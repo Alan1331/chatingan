@@ -70,4 +70,20 @@ class User extends Authenticatable implements JWTSubject
     {
         return [];
     }
+
+    /**
+     * Get the messages the user has sent.
+     */
+    public function sentMessages()
+    {
+        return $this->hasMany(Message::class, 'sender');
+    }
+
+    /**
+     * Get the messages the user has received.
+     */
+    public function receivedMessages()
+    {
+        return $this->hasMany(Message::class, 'receiver');
+    }
 }
