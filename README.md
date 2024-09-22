@@ -24,7 +24,7 @@ The application is mainly using MVC architecture from Laravel without Views comp
 - **Authorization**: JWT token
 
 ### Diagram
-The diagram will be shown here
+![Architecture Diagram](resources/img/architecture.png)
 
 ---
 
@@ -34,7 +34,7 @@ The diagram will be shown here
 There are only 2 entities in the database including User and Message. These entities are tied with one-to-many relationship from User to Message.
 
 ### ERD Diagram
-Insert the ERD image or a link to the ERD file here.
+![Entity Relationship Diagram](resources/img/erd.png)
 
 ---
 
