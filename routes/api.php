@@ -8,7 +8,7 @@ Route::post('login', [AuthController::class, 'login']);
 Route::post('register', [AuthController::class, 'register']);
 
 // Protected routes
-Route::middleware('auth:api')->group(function () {
-    Route::get('users/me', [AuthController::class, 'userProfile']);
+Route::middleware('jwt.auth')->group(function () {
+    Route::get('users/me', [AuthController::class, 'getProfile']);
     Route::post('logout', [AuthController::class, 'logout']);
 });

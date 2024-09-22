@@ -22,27 +22,23 @@ class AuthController extends Controller
         ]);
 
         // Validate the incoming request data
-        $validator = Validator::make($request->all(), [
+        $validatedData = $request->validate([
             'name'           => 'required|string|max:255',
             'email'          => 'required|string|email|max:255|unique:users',
             'password'       => 'required|string|min:6|confirmed',
-            'address'        => 'required|string', // No max length due to 'text' data type
+            'address'        => 'required|string',
             'gender'         => 'required|boolean',
             'marital_status' => 'required|string|in:single,married,divorced,widowed',
         ]);
 
-        if ($validator->fails()) {
-            return response()->json($validator->errors(), 422);
-        }
-
-        // Create the user in the database
+        // Proceed with user creation using $validatedData
         $user = User::create([
-            'name'           => $request->name,
-            'email'          => $request->email,
-            'password'       => Hash::make($request->password),
-            'address'        => $request->address,
-            'gender'         => $request->gender,
-            'marital_status' => $request->marital_status,
+            'name'           => $validatedData['name'],
+            'email'          => $validatedData['email'],
+            'password'       => Hash::make($validatedData['password']),
+            'address'        => $validatedData['address'],
+            'gender'         => $validatedData['gender'],
+            'marital_status' => $validatedData['marital_status'],
         ]);
 
         // Generate a JWT token for the newly created user
