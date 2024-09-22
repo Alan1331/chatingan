@@ -148,6 +148,49 @@ Retrieves the profile of the currently authenticated user.
 
 ---
 
+### 5. **Update Authenticated User Profile**
+
+Allows the authenticated user to update their profile information.
+
+- **URL**: `/api/users/me`
+- **Method**: `PUT`
+- **Headers**:
+  - `Authorization: Bearer your-jwt-token`
+  - `Content-Type: application/json`
+- **Request Body** (optional fields):
+  
+  | Field              | Type    | Description                              |
+  |--------------------|---------|------------------------------------------|
+  | `name`             | string  | The user's full name.                    |
+  | `email`            | string  | The user's email (must be unique).       |
+  | `password`         | string  | The user's new password (min 6 characters).  |
+  | `password_confirmation` | string | Confirmation of the new password.      |
+  | `address`          | string  | The user's address.                      |
+  | `gender`           | boolean | The user's gender (true = male, false = female). |
+  | `marital_status`   | string  | The user's marital status. Valid values: `single`, `married`, `divorced`, `widowed`. |
+
+- **Response**:
+
+  - **200 OK**: On successful profile update.
+  - **422 Unprocessable Entity**: If validation fails.
+
+  ```json
+  {
+    "message": "Profile updated successfully",
+    "user": {
+      "id": 1,
+      "name": "Jane Doe",
+      "email": "jane.doe@example.com",
+      "address": "456 New Street, Springfield",
+      "gender": true,
+      "marital_status": "married",
+      "created_at": "2023-09-22T12:00:00Z",
+      "updated_at": "2023-09-22T12:30:00Z"
+    }
+  }
+
+---
+
 ## Authentication
 
 All routes, except `/api/login` and `/api/register`, require a valid JWT token to be passed in the `Authorization` header as follows:
@@ -221,6 +264,18 @@ curl -X POST http://your-domain/api/login   -H "Content-Type: application/json" 
 
 # Get the authenticated user's profile
 curl -X GET http://your-domain/api/users/me   -H "Authorization: Bearer your-jwt-token"   -H "Content-Type: application/json"
+
+# Update the authenticated user's profile
+curl -X PUT http://your-domain/api/users/me
+  -H "Authorization: Bearer your-jwt-token"
+  -H "Content-Type: application/json" 
+  -d '{
+    "name": "Jane Doe",
+    "email": "jane.doe@example.com",
+    "address": "456 New Street, Springfield",
+    "gender": false,
+    "marital_status": "married"
+  }'
 
 # Logout
 curl -X POST http://your-domain/api/logout   -H "Authorization: Bearer your-jwt-token"   -H "Content-Type: application/json"
