@@ -121,4 +121,38 @@ class AuthController extends Controller
             'user' => $user
         ], 200);
     }
+
+    /**
+     * Update the authenticated user's profile.
+     */
+    public function updateProfile(Request $request)
+    {
+        // Get the authenticated user
+        $user = auth()->user();
+
+        // Validate the incoming request data
+        $validatedData = $request->validate([
+            'name'           => 'sometimes|required|string|max:255',
+            'email'          => 'sometimes|required|string|email|max:255|unique:users,email,' . $user->id,
+            'password'       => 'sometimes|required|string|min:6|confirmed',
+            'address'        => 'sometimes|required|string',
+            'gender'         => 'sometimes|required|boolean',
+            'marital_status' => 'sometimes|required|string|in:single,married,divorced,widowed',
+        ]);
+
+        // Update user profile
+        if (isset($validatedData['password'])) {
+            // Hash the password if it's being updated
+            $validatedData['password'] = Hash::make($validatedData['password']);
+        }
+
+        // Update the user in the database
+        $user->update($validatedData);
+
+        // Return the updated user profile
+        return response()->json([
+            'message' => 'Profile updated successfully',
+            'user'    => $user,
+        ], 200);
+    }
 }
