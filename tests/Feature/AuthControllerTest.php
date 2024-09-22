@@ -4,7 +4,10 @@ namespace Tests\Feature;
 
 use Tests\TestCase;
 use App\Models\User;
+use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Facades\Validator;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use Tymon\JWTAuth\Facades\JWTAuth;
 
 class AuthControllerTest extends TestCase
 {
@@ -202,6 +205,95 @@ class AuthControllerTest extends TestCase
     public function test_logout_unauthenticated()
     {
         $response = $this->postJson('/api/logout');
+
+        $response->assertStatus(401)
+                 ->assertJson([
+                     'message' => 'Token not provided',
+                 ]);
+    }
+
+    /**
+     * Test updating the authenticated user's profile with valid data.
+     */
+    public function test_update_profile_with_valid_data()
+    {
+        // Create and authenticate a user
+        $user = User::factory()->create([
+            'name' => 'John Doe',
+            'email' => 'john.doe@example.com',
+            'address' => '123 Main Street, Springfield',
+            'gender' => true,
+            'marital_status' => 'single',
+        ]);
+
+        $token = JWTAuth::fromUser($user);
+
+        // New profile data
+        $updatedData = [
+            'name' => 'Jane Doe',
+            'email' => 'jane.doe@example.com',
+            'address' => '456 New Street, Springfield',
+            'gender' => false,  // Female
+            'marital_status' => 'married',
+        ];
+
+        $response = $this->withHeader('Authorization', "Bearer $token")
+                         ->putJson('/api/users/me', $updatedData);
+
+        $response->assertStatus(200)
+                 ->assertJson([
+                     'message' => 'Profile updated successfully',
+                     'user' => [
+                         'name' => 'Jane Doe',
+                         'email' => 'jane.doe@example.com',
+                         'address' => '456 New Street, Springfield',
+                         'gender' => false,
+                         'marital_status' => 'married',
+                     ],
+                 ]);
+
+        // Ensure the user was updated in the database
+        $this->assertDatabaseHas('users', [
+            'email' => 'jane.doe@example.com',
+            'name' => 'Jane Doe',
+        ]);
+    }
+
+    /**
+     * Test updating the authenticated user's profile with invalid data.
+     */
+    public function test_update_profile_with_invalid_data()
+    {
+        // Create and authenticate a user
+        $user = User::factory()->create();
+
+        $token = JWTAuth::fromUser($user);
+
+        // Invalid profile data
+        $invalidData = [
+            'email' => 'not-a-valid-email',  // Invalid email format
+            'password' => 'short',           // Password too short
+        ];
+
+        $response = $this->withHeader('Authorization', "Bearer $token")
+                         ->putJson('/api/users/me', $invalidData);
+
+        $response->assertStatus(422)
+                 ->assertJsonValidationErrors(['email', 'password']);
+    }
+
+    /**
+     * Test updating the profile without authentication.
+     */
+    public function test_update_profile_unauthenticated()
+    {
+        // New profile data
+        $updatedData = [
+            'name' => 'Jane Doe',
+            'email' => 'jane.doe@example.com',
+        ];
+
+        $response = $this->putJson('/api/users/me', $updatedData);
 
         $response->assertStatus(401)
                  ->assertJson([
